@@ -1,4 +1,6 @@
 ## ODBC integration for Laravel Framework
+# FORKED FROM andreossido/laravel-odbc to support PHP 8 and Athena ODBC's driver
+# Athena does not support prepared statements.
 This integration allows the use of <b>odbc_*</b> php function with Laravel framework instead of PDO.<br>
 It emulates PDO class used by Laravel.
 
