@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: Andrea
@@ -16,13 +17,15 @@ class ODBCPdoStatement extends PDOStatement
     protected $params = [];
     protected $statement;
 
+    private $conn = null;
+
     public function __construct($conn, $query)
     {
         $this->query = preg_replace('/(?<=\s|^):[^\s:]++/um', '?', $query);
 
         $this->params = $this->getParamsFromQuery($query);
 
-        $this->statement = odbc_prepare($conn, $this->query);
+        $this->conn = $conn;
     }
 
     protected function getParamsFromQuery($qry)
@@ -52,11 +55,32 @@ class ODBCPdoStatement extends PDOStatement
 
     public function execute($ignore = null)
     {
-        odbc_execute($this->statement, $this->params);
+        $explodedQuery = explode('?', $this->query);
+        $parameterizedQuery = '';
+
+        $i = 1;
+        while (isset($this->params[$i])) {
+            if (gettype($this->params[$i]) == 'integer') {
+                $parameterizedQuery = $parameterizedQuery . $explodedQuery[$i - 1] . $this->params[$i];
+            } else {
+                $val = $this->mysql_escape_mimic($this->params[$i]);
+                $parameterizedQuery = $parameterizedQuery . $explodedQuery[$i - 1] . "'" . $val . "'";
+            }
+            $i++;
+        }
+
+        $parameterizedQuery = $parameterizedQuery . $explodedQuery[count($explodedQuery) - 1];
+
         $this->params = [];
+
+        $this->statement = odbc_prepare($this->conn, $parameterizedQuery);
+        odbc_execute($this->statement, $this->params);
+    }
+    public function setFetchMode(int $mode, mixed ...$args)
+    {
     }
 
-    public function fetchAll($how = NULL, $class_name = NULL, $ctor_args = NULL)
+    public function fetchAll(int $mode = \PDO::FETCH_BOTH, mixed ...$args)
     {
         $records = [];
         while ($record = $this->fetch()) {
@@ -68,5 +92,17 @@ class ODBCPdoStatement extends PDOStatement
     public function fetch($option = null, $ignore = null, $ignore2 = null)
     {
         return odbc_fetch_array($this->statement);
+    }
+
+    private static function mysql_escape_mimic($inp)
+    {
+        if (is_array($inp))
+            return array_map(__METHOD__, $inp);
+
+        if (!empty($inp) && is_string($inp)) {
+            return str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $inp);
+        }
+
+        return $inp;
     }
 }
