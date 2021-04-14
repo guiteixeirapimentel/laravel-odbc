@@ -1,8 +1,8 @@
 {
-	"name": "abram/laravel-odbc",
+	"name": "guiteixeirapimentel/laravel-odbc",
 	"description": "ODBC integration for Laravel framework ",
 	"type": "library",
-	"homepage": "https://github.com/andreossido/laravel-odbc",
+	"homepage": "https://github.com/guiteixeirapimentel/laravel-odbc",
 	"authors": [
 		{
 			"name": "Andrea Abram",
