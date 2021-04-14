@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: Andrea
@@ -30,8 +31,9 @@ class ODBCPdo extends PDO
         return new ODBCPdoStatement($this->getConnection(), $statement);
     }
 
-    public function quote(string $string, int $type = \PDO::PARAM_STR){
-        return '"'.$string.'"';
+    public function quote(string $string, int $type = \PDO::PARAM_STR)
+    {
+        return '"' . $string . '"';
     }
 
     /**
